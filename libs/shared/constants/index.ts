@@ -43,6 +43,7 @@ export const PAIRS = {
 export const QUERY_KEY = {
   COUNTRIES: 'countries',
   PAIRS: 'pairs',
+  ORDER_BOOK: 'order_book',
   TRADES: 'trades',
   STAKING_HISTORY: 'staking_history',
   CHART_HISTORY: 'chart_history',
@@ -83,6 +84,7 @@ export const API_ENDPOINT = {
   GET_AVAILABLE_LANGUAGES: '/api/v1/public/lang',
   GET_ANONYMOUS_TOKEN: '/api/v1/public/anonymous',
   GET_PAIRS: 'api/v1/market/pairs',
+  GET_ORDER_BOOK: (symbol: string) => `/api/v1/market/order-book?symbol=${symbol}`,
   GET_TRADES: (symbol: string) => `/api/v1/market/trades?symbol=${symbol}`,
   GET_MY_TRADES: (symbol?: string) => `/api/v1/user/trade-history${symbol ? `?symbol=${symbol}` : ''}`,
   GET_ORDER_HISTORY: (symbol?: string) => `/api/v1/user/order-history${symbol ? `?symbol=${symbol}` : ''}`,
@@ -106,6 +108,7 @@ export const API_ENDPOINT = {
   RESET_PASS: '/api/v1/auth/reset-password',
   TWO_FACTOR: '/api/v1/auth/verify-twofa',
   VERIFY_IP: '/api/v1/auth/verify-ip',
+  VERIFY_OTP: '/api/v1/auth/verify-profile-code',
   RESEND_IP_VERIFICATION_MAIL: `api/v1/auth/resend-ip-verification`,
   REFRESH_TOKEN: '/api/v1/auth/refresh',
   GET_ORDER_OPEN: (symbol?: string) => `/api/v1/user/open-orders${symbol ? `?symbol=${symbol}` : ''}`,
@@ -127,5 +130,6 @@ export const API_ENDPOINT = {
   GET_MARKET_COIN_PRICE: (coin: any) => `/api/v1/market/coin-price?coin=${coin}`,
   GET_WALLET_OVERVIEW: '/api/v1/wallet/overview',
   GET_SPOT_OVERVIEW: '/api/v1/wallet/spot-overview',
-  GET_TRANSACTION_LIST: (page: number, limit: number) => `/api/v1/wallet/transaction?page=${page}&limit=${limit}`
+  GET_TRANSACTION_LIST: (page: number, limit: number) => `/api/v1/wallet/transaction?page=${page}&limit=${limit}`,
+  GENERATE_DEPOSIT_ADDRESS: `/api/v1/wallet/deposit-address`
 }

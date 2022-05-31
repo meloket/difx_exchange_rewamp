@@ -1,9 +1,9 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { API_ENDPOINT } from "@difx/constants";
 import { Icon, Loading, Typography } from "@difx/core-ui";
-import { BaseResponse, Order, SocketEvent, isLoggedInAtom, useHttpGetByEvent, useHttpPut, useSocket, useSocketProps } from "@difx/shared";
+import t from "@difx/locale";
+import { BaseResponse, Order, SocketEvent, isLoggedInAtom, useHttpGetByEvent, useHttpPut, useSocket } from "@difx/shared";
 import { getCurrentDateTimeByDateString } from "@difx/utils";
 import { Table } from "antd";
 import { AxiosResponse } from "axios";
@@ -20,26 +20,25 @@ export function OrderOpenReport({ height = 200, pair, isSelectedPairOnly = false
 
   const [tableData, setTableData] = useState<Array<Order>>([]);
 
-  const param: useSocketProps = {
-    event: SocketEvent.user_orders,
-  };
-  const userOrdersData = useSocket(param);
-
   const getOrderBookSuccess = (response: AxiosResponse<{ result: Array<Order> }>) => {
     const { data } = response;
-
     if (data && !isEmpty(data.result)) {
       for (const order of data.result) {
         if (!tableData.find(e => e.id === order.id)) {
           tableData.push(order);
-          setTableData([...tableData]);
         }
       }
+      let newTableData = tableData;
+      if(isSelectedPairOnly){
+        newTableData = newTableData.filter((e:any)=>e.symbol === pair);
+      }
+      setTableData([...newTableData]);
     } else {
       setTableData([]);
     }
   }
 
+  const userOrdersData = useSocket({event: SocketEvent.user_orders});
   useEffect(() => {
     if (userOrdersData) {
       const index = tableData.findIndex(e => e.id === userOrdersData.id);
@@ -48,6 +47,7 @@ export function OrderOpenReport({ height = 200, pair, isSelectedPairOnly = false
           tableData.splice(index, 1);
         } else {
           tableData[index].q = userOrdersData.q;
+          tableData[index].oq = userOrdersData.oq;
         }
       } else {
         userOrdersData.timestamp = new Date();
@@ -76,18 +76,17 @@ export function OrderOpenReport({ height = 200, pair, isSelectedPairOnly = false
         getOrderBooks(null);
       }
     }
-  }, [isSelectedPairOnly, isLoggedIn]);
+  }, [isSelectedPairOnly, isLoggedIn, pair]);
 
   const columns = [
     {
-      title: 'Date',
+      title: t("report.date"),
       sorter: {
         compare: (a, b) => {
           const aTime = new Date(a.timestamp).getTime();
           const bTime = new Date(b.timestamp).getTime();
           return aTime - bTime;
         },
-        multiple: 4,
       },
       dataIndex: 'timestamp',
       render: (text) => {
@@ -99,11 +98,10 @@ export function OrderOpenReport({ height = 200, pair, isSelectedPairOnly = false
       }
     },
     {
-      title: 'Symbol',
+      title: t("report.symbol"),
       dataIndex: 'symbol',
       sorter: {
         compare: (a, b) => a.symbol.localeCompare(b.symbol),
-        multiple: 2,
       },
       render: (text) => {
         return (
@@ -114,11 +112,10 @@ export function OrderOpenReport({ height = 200, pair, isSelectedPairOnly = false
       }
     },
     {
-      title: 'Side',
+      title: t("report.side"),
       dataIndex: 's',
       sorter: {
         compare: (a, b) => a.s - b.s,
-        multiple: 3,
       },
       render: (text) => {
         return (
@@ -129,11 +126,10 @@ export function OrderOpenReport({ height = 200, pair, isSelectedPairOnly = false
       }
     },
     {
-      title: 'Price',
+      title: t("report.price"),
       dataIndex: 'p',
       sorter: {
         compare: (a, b) => a.p - b.p,
-        multiple: 4,
       },
       render: (text) => {
         return (
@@ -144,16 +140,44 @@ export function OrderOpenReport({ height = 200, pair, isSelectedPairOnly = false
       }
     },
     {
-      title: 'Size',
+      title: t("report.size"),
       dataIndex: 'q',
       sorter: {
         compare: (a, b) => a.q - b.q,
-        multiple: 4,
       },
       render: (text) => {
         return (
           <div className='cell'>
             <Typography level="B3">{text}</Typography>
+          </div>
+        )
+      }
+    },
+    {
+      title: t("report.filled"),
+      dataIndex: 'oq',
+      sorter: {
+        compare: (a, b) => a.q - b.q,
+      },
+      render: (text,record) => {
+        const filled = ((record.oq - record.q) * 100)/record.oq
+        return (
+          <div className='cell'>
+            <Typography level="B3">{`${filled}%` || '0.00%'}</Typography>
+          </div>
+        )
+      }
+    },
+    {
+      title: t("report.total"),
+      dataIndex: 'total',
+      sorter: {
+        compare: (a, b) => a.q - b.q,
+      },
+      render: (text) => {
+        return (
+          <div className='cell'>
+            <Typography level="B3">{text || '0.00'}</Typography>
           </div>
         )
       }

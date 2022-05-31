@@ -42,6 +42,9 @@ export const PairMetadataStyled = styled.div`
         margin-left: 15px;
         margin-right: 15px;
         white-space: nowrap;
+        .ant-typography.B3{
+          color: ${({ theme }: { theme: ThemeInterface }) => theme.fontColor.secondary} !important;
+        }
       }
     }
     .right {
@@ -556,10 +559,16 @@ export const PlaceOrderWraperStyled = styled.div`
         .bid{
           margin-right: 10px;
           flex-grow: 1;
+          &.compact{
+            margin-right: 0px;
+          }
         }
         .ask{
           margin-left: 10px;
           flex-grow: 1;
+          &.compact{
+            margin-left: 0px;
+          }
         }
       }
     }
@@ -571,6 +580,26 @@ export const OrderReportsWraperStyled = styled.div`
     height:100%;
     .ant-table-column-title{
       font-size: 12px;
+    }
+    .ant-table-row{
+      .ant-table-cell{
+        min-width: 50px;
+      }
+    }
+    .ant-table-expanded-row.ant-table-expanded-row-level-1{
+      td{
+        .head{
+          display:flex;
+          font-size: 12px;
+          .lbl{
+              color: ${({ theme }) => theme.fontColor.secondary};
+              margin: 0 -25px;
+          }
+          .val{
+            margin:0 -17px;
+          }
+        }
+      }
     }
     .display-selected-pair{
       .wrapper{

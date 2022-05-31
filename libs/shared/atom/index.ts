@@ -2,6 +2,7 @@ import { atom, PrimitiveAtom } from "jotai";
 import { User, Permissions, Config, Balance } from "..";
 
 export const themeAtom = atom<string>("light");
+export const previousPathAtom = atom<string>("/");
 export const anonymousTokenAtom = atom<string | null>(null) as PrimitiveAtom<string | null>;;
 export const pageTitleAtom = atom<string>("DIFX | Cryptocurrency Spot Exchange");
 
@@ -41,3 +42,9 @@ export const userBalanceAtom = atom<Balance[]>([]) as PrimitiveAtom<Balance[]>;
 export const layoutTypeAtom = atom<string | 'default' | 'compact' | 'pro'>('default');
 
 export const candleTypeAtom = atom<string | 'greenUp' | 'redUp'>('greenUp');
+
+export const withrawalDetailsModalAtom = atom<boolean>(false) as PrimitiveAtom<boolean>;
+export const walletWithdrawModalAtom = atom<boolean>(false) as PrimitiveAtom<boolean>;
+
+export const withdrawModalTabsAtom = atom<boolean>(false) as PrimitiveAtom<boolean>;
+export const transferModalAtom = atom<boolean>(false) as PrimitiveAtom<boolean>;

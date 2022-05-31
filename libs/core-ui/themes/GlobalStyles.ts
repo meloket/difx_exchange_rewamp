@@ -13,9 +13,9 @@ const GlobalStyles = createGlobalStyle`
     body {
         font-family: "Lato", sans-serif !important;
         transform: ${({ theme }: { theme: ThemeInterface }) =>
-        theme.transition} !important;
+    theme.transition} !important;
         background: ${({ theme }: { theme: ThemeInterface }) =>
-        theme.background.body} !important;
+    theme.background.body} !important;
     }
     scrollbar-color: ${({ theme }: { theme: ThemeInterface }) => theme.scrollbar.bar} ${({ theme }: { theme: ThemeInterface }) => theme.scrollbar.background};
     scrollbar-width: thin;
@@ -23,8 +23,8 @@ const GlobalStyles = createGlobalStyle`
     :-webkit-autofill:hover,
     :-webkit-autofill:focus,
     :-webkit-autofill:active, .ant-form-item-control-input-content .ant-input-affix-wrapper>input.ant-input:focus, .ant-form-item-control-input-content .ant-input-affix-wrapper > input.ant-input:focus{
-        -webkit-box-shadow: 0 0 0 30px white inset !important;
-        box-shadow: 0 0 0 30px white inset !important;
+        -webkit-box-shadow: 0 0 0 30px white inset;
+        box-shadow: 0 0 0 30px white inset;
     }
     ::-webkit-scrollbar {
       width: 8px;
@@ -49,6 +49,7 @@ const GlobalStyles = createGlobalStyle`
     }
     .ant-typography.ant-typography-secondary{color:${({ theme }: { theme: ThemeInterface }) => theme.fontColor.secondary} !important;}
     .ant-typography{color:${({ theme }: { theme: ThemeInterface }) => theme.fontColor.primary};}
+    .ant-table-thead > tr > th:not(:last-child):not(.ant-table-selection-column):not(.ant-table-row-expand-icon-cell):not([colspan])::before{display:none}
     .common-table{
     tr th, tr td{border-bottom:${({ theme }: { theme: ThemeInterface }) => theme.border.secondary} !important;}
     tr{
@@ -256,13 +257,13 @@ const GlobalStyles = createGlobalStyle`
       height: ${({ theme }: { theme: ThemeInterface }) => theme.inputFieldHeight} !important;
       background: ${({ theme }: { theme: ThemeInterface }) => theme.background.primary} !important;
       border-radius: ${({ theme }: { theme: ThemeInterface }) => theme.borderRadius.regular} !important;
-      border: ${({ theme }: { theme: ThemeInterface }) => theme.border.secondary} !important;
+      border: none !important;
       color: ${({ theme }: { theme: ThemeInterface }) => theme.fontColor.primary} !important;
       &::placeholder{
         color: ${({ theme }: { theme: ThemeInterface }) => theme.color.InputPlaceholder} !important;;
       }
       &:hover{
-        border: ${({ theme }: { theme: ThemeInterface }) => theme.border.primary} !important;
+        border: none !important;
       }
     }
     .ant-input-suffix{
@@ -270,7 +271,7 @@ const GlobalStyles = createGlobalStyle`
       }
 
     .ant-input:hover{
-      border: ${({ theme }: { theme: ThemeInterface }) => theme.border.primary} !important;
+      border: none !important;
     }
 
     .ant-input-affix-wrapper,
@@ -295,7 +296,7 @@ const GlobalStyles = createGlobalStyle`
 
     .ant-input-affix-wrapper{
       background: ${({ theme }: { theme: ThemeInterface }) => theme.background.primary} !important;
-      border: ${({ theme }: { theme: ThemeInterface }) => theme.border.secondary} !important;
+      border: none !important;
       height: 48px;
       .ant-input-prefix{
         svg{
@@ -348,11 +349,17 @@ const GlobalStyles = createGlobalStyle`
           .ant-table-tbody .ant-table-cell span{
             display: inline-block !important;
           }
-          /* .ant-table-container .ant-table-content .ant-table-thead{
+          .ant-table-expanded-row.ant-table-expanded-row-level-1{
+            background: ${({ theme }: { theme: ThemeInterface }) => theme.background.space};
+            td div{
+              padding:5px 24px;
+            }
+          }
+          &.ant-table-small .ant-table-container .ant-table-content .ant-table-thead{
             .ant-table-cell{
               font-size: 11px;
             }
-          } */
+          }
           .ant-table-thead{
             th{
               background: transparent !important;
@@ -377,7 +384,20 @@ const GlobalStyles = createGlobalStyle`
           }
           .ant-table-tbody{
             tr{
+              &:hover{
+                background : ${({ theme }: { theme: ThemeInterface }) => theme.color.rowHover};
+                cursor: pointer;
+              }
               line-height: 0.5;
+              .ant-table-cell.ant-table-row-expand-icon-cell{
+                button{
+                  border-color: transparent;
+                  background: transparent;
+                  &:focus{
+                    color: unset;
+                  }
+                }
+              }
               td{
                 border:unset;
                 background: transparent !important;
@@ -404,7 +424,7 @@ const GlobalStyles = createGlobalStyle`
       height: ${({ theme }: { theme: ThemeInterface }) => theme.inputFieldHeight} !important;
       background: ${({ theme }: { theme: ThemeInterface }) => theme.background.primary} !important;
       border-radius: ${({ theme }: { theme: ThemeInterface }) => theme.borderRadius.regular} !important;
-      border: ${({ theme }: { theme: ThemeInterface }) => theme.border.secondary} !important;
+      border: none !important;
       color: ${({ theme }: { theme: ThemeInterface }) => theme.fontColor.primary} !important;
     }
 
@@ -516,10 +536,19 @@ const GlobalStyles = createGlobalStyle`
         }
       }
 
+      .ant-popover-inner-content{
+        color:${({ theme }: { theme: ThemeInterface }) => theme.fontColor.primary} !important;
+      }
+
       .ant-popover.ant-popover-placement-bottomRight, .ant-popover.ant-popover-placement-bottom{
         .ant-popover-arrow{
           display:none;
         }
+      }
+
+      .ant-input-affix-wrapper.error{
+        border: solid 1px ${({ theme }: { theme: ThemeInterface }) => theme.color.danger} !important;
+        box-shadow: unset !important;
       }
 
       .compact-list-pairs{
@@ -541,6 +570,19 @@ const GlobalStyles = createGlobalStyle`
           }
         }
       }
+      
+      .ant-popover.ant-popover-placement-top{
+        .ant-popover-arrow .ant-popover-arrow-content{
+          &:before{
+            background:unset;
+          }
+          background: ${({ theme }) => theme.background.popover};
+        }
+        .ant-popover-inner{
+          background: ${({ theme }) => theme.background.popover};
+        }
+      }
+
       .ant-popover-content{
         .ant-popover-arrow .ant-popover-arrow-content{
           &:before{
@@ -645,6 +687,42 @@ const GlobalStyles = createGlobalStyle`
         display: flex;
         align-items: center;
   }
+  /* Small Select */
+  .ant-select.ant-select-sm.input-small{
+    .ant-select-selector{
+      height: 32px !important;
+      display: flex;
+      align-items: center;
+      background: ${({ theme }: { theme: ThemeInterface }) => theme.background.secondary} !important;
+      border: ${({ theme }: { theme: ThemeInterface }) => theme.border.secondary} !important;
+    }
+  }
+  .ant-radio-checked .ant-radio-inner{
+    border-width: 4px;
+  }
+  .ant-radio-inner{display:none}
+  .ant-radio-inner:after{width:0px !important;height:0px !important}
+  .suffix-amount{
+        display:flex;
+        .line{
+        border-left: solid 1px ${({theme}) => theme.border.color};
+        margin-left: 6px;
+        margin-right: 1px;
+        }
+    }
+  .successTag{
+    background: ${({ theme }: { theme: ThemeInterface }) => theme.color.successLight};
+    padding: 10px;
+    border-radius: ${({ theme }: { theme: ThemeInterface }) => theme.borderRadius.round};
+    color: ${({ theme }: { theme: ThemeInterface }) => theme.successColor};
+  }
+  .errorTag{
+    background: ${({ theme }: { theme: ThemeInterface }) => theme.color.errorLight};
+    padding: 10px;
+    border-radius: ${({ theme }: { theme: ThemeInterface }) => theme.borderRadius.round};
+    color: ${({ theme }: { theme: ThemeInterface }) => theme.errorColor};
+  }
+  
 `;
 
 export { GlobalStyles };

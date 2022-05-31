@@ -1,15 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable react-hooks/exhaustive-deps */
-import { Button, Form, Input, Slider } from "antd";
+import { Button, Form, FormInstance, Input, Slider, Popover } from "antd";
 import clsx from "clsx";
-import isEmpty from "lodash/isEmpty";
-import { Typography } from "./../Typography";
-import { useAtomValue } from "jotai/utils";
+import t from "./../../../locale";
 import { useRouter } from "next/router";
 import { useEffect, useState } from 'react';
-import { PairType, PlaceOrderRequest, userBalanceAtom } from "./../../../shared";
+import { useAtom } from "jotai";
+import { PairType, PlaceOrderRequest, previousPathAtom, useCurrency } from "./../../../shared";
 import { getPriceFormatted } from "./../../../shared/utils/priceUtils";
 import DepositIcon from "./../Icon/DepositIcon";
+import { Typography } from "./../Typography";
 import {
   ComponentStyled
 } from "./styled";
@@ -29,9 +29,10 @@ export interface OrderFormProps {
   isLoading?: boolean,
   canDeposit?: boolean,
   balance?: number;
+  form: FormInstance
 }
 
-export function OrderForm({balance, layout = 'default', canDeposit = true, isLoading = true, onPlaceOrder, priceSelected, side = 'bid', type = 'limit', baseCurrency, quoteCurrency, isLoggedIn = false, pairInfo }: OrderFormProps) {
+export function OrderForm({ form, balance = 0, layout = 'default', canDeposit = true, isLoading = true, onPlaceOrder, priceSelected, side = 'bid', type = 'limit', baseCurrency, quoteCurrency, isLoggedIn = false, pairInfo }: OrderFormProps) {
 
   const marks = {
     0: ' ',
@@ -41,30 +42,43 @@ export function OrderForm({balance, layout = 'default', canDeposit = true, isLoa
     100: ' ',
   };
 
+  const [, setPrevousPath] = useAtom(previousPathAtom)
+
   const router = useRouter();
+  const { asPath } = router;
+
+  const { currentCurrency: fiatCurrency } = useCurrency();
 
   const [isDisabled, setIsDisabled] = useState(isLoggedIn);
   const [sliderValue, setSliderValue] = useState(0);
 
-  const [numberRound, setNumberRound] = useState<number>(100);
-
-  const [form] = Form.useForm();
+  // const [numberRound, setNumberRound] = useState<number>(100);
+  const [groupPrecision, setGroupPrecision] = useState<number>(0);
+  const [bAmount, setBAmmount] = useState<number>(0);
+  const [showAmountPopover, setShowAmountPopover] = useState(false);
 
   useEffect(() => {
-    if (priceSelected) form.setFieldsValue({ [`${side}.price`]: priceSelected })
+    if (priceSelected) {
+      form.setFieldsValue({ [`${side}.price`]: priceSelected });
+      form.setFieldsValue({ [`${side}.total`]: priceSelected });
+      const amount = form.getFieldValue(`${side}.amount`);
+      const total = amount * priceSelected;
+      form.setFieldsValue({
+        [`${side}.total`]: Math.floor(total * Math.pow(10, groupPrecision)) / Math.pow(10, groupPrecision),
+      });
+    }
   }, [priceSelected]);
 
   useEffect(() => {
     if (pairInfo && !priceSelected) form.setFieldsValue({ [`${side}.price`]: pairInfo.last })
-    const group_precision = pairInfo ? pairInfo.group_precision : 2;
-    setNumberRound(Math.pow(10, group_precision));
-  }, [pairInfo]);
+    // const group_precision = pairInfo ? pairInfo.group_precision : 2;
+    // setNumberRound(Math.pow(10, group_precision));
 
-  useEffect(() => {
-    form.setFieldsValue({ [`${side}.stop`]: 0 });
-    form.setFieldsValue({ [`${side}.amount`]: 0 });
-    form.setFieldsValue({ [`${side}.total`]: 0 });
-  }, []);
+    if (pairInfo) {
+      setGroupPrecision(pairInfo.group_precision);
+      setBAmmount(pairInfo.bamount);
+    }
+  }, [pairInfo]);
 
   const onSubmit = (formData: PlaceOrderRequest) => {
     onPlaceOrder(formData, type, side);
@@ -74,8 +88,16 @@ export function OrderForm({balance, layout = 'default', canDeposit = true, isLoa
     return value > 0;
   }
 
-  const onFormChange = (changeField: any) => {
+  const onFocusAmountField = () => {
+    let visible = false;
+    if (balance) {
+      const amount = form.getFieldValue(`${side}.amount`);
+      if (amount && amount > balance) visible = true;
+    }
+    setShowAmountPopover(visible);
+  }
 
+  const onFormChange = (changeField: any) => {
     setSliderValue(0);
 
     // Update input
@@ -86,20 +108,38 @@ export function OrderForm({balance, layout = 'default', canDeposit = true, isLoa
         const currentPrice = form.getFieldValue(`${side}.price`);
         const amount: number = currentPrice ? fieldValue / currentPrice : 0;
         form.setFieldsValue({
-          [`${side}.amount`]: Math.floor(amount * numberRound) / numberRound,
+          [`${side}.amount`]: Math.floor(amount * Math.pow(10, bAmount)) / Math.pow(10, bAmount),
         });
       } else if (fieldName === `${side}.amount`) {
         const currentPrice = form.getFieldValue(`${side}.price`);
         const newTotal: number = currentPrice * fieldValue;
         form.setFieldsValue({
-          [`${side}.total`]: Math.floor(newTotal * numberRound) / numberRound,
+          [`${side}.total`]: Math.floor(newTotal * Math.pow(10, groupPrecision)) / Math.pow(10, groupPrecision),
         });
+
+        if (side === "bid") {
+          const currentPrice = form.getFieldValue(`${side}.price`);
+          const maxAmount = balance / currentPrice;
+          if (maxAmount < Number(fieldValue)) {
+            setShowAmountPopover(true);
+          } else {
+            setShowAmountPopover(false);
+          }
+        } else if (side === "ask") {
+          if (balance && fieldValue > balance) {
+            setShowAmountPopover(true);
+          } else {
+            setShowAmountPopover(false);
+          }
+        }
+
+
       } else if (fieldName === `${side}.price`) {
         const amount = form.getFieldValue(`${side}.amount`);
         const currentPrice = form.getFieldValue(`${side}.price`);
         const newTotal: number = amount * currentPrice;
         form.setFieldsValue({
-          [`${side}.total`]: Math.floor(newTotal * numberRound) / numberRound,
+          [`${side}.total`]: Math.floor(newTotal * Math.pow(10, groupPrecision)) / Math.pow(10, groupPrecision),
         });
       }
       if (balance) {
@@ -149,7 +189,12 @@ export function OrderForm({balance, layout = 'default', canDeposit = true, isLoa
   // eslint-disable-next-line
   // @ts-ignore
   const getButtonSubmitLabel = () => {
-    if (!isLoggedIn) return 'Log in or Sign up';
+    if (!isLoggedIn) {
+      return <div onClick={(e: any) => { setPrevousPath(asPath); !e.target.className.includes("signup") && !isLoggedIn && router.push('/login') }} style={{ display: "flex", justifyContent: "center" }}>
+        <div onClick={() => { setPrevousPath(asPath); !isLoggedIn && router.push('/login') }} style={{ marginRight: 5 }}>Log in or</div>
+        <div className="signup" onClick={() => { setPrevousPath(asPath); !isLoggedIn && router.push('/register') }}>Sign up</div>
+      </div>
+    }
     if (side === 'ask') return 'Sell';
     if (side === 'bid') return 'Buy'
   }
@@ -162,18 +207,18 @@ export function OrderForm({balance, layout = 'default', canDeposit = true, isLoa
       const currentPrice = pairInfo?.last || priceSelected;
 
       const percentOfBalance: number = (balance * value) / 100;
-      const percentOfBalanceRound: number = Math.floor(percentOfBalance * numberRound) / numberRound;
+      const percentOfBalanceRound: number = Math.floor(percentOfBalance * Math.pow(10, groupPrecision)) / Math.pow(10, groupPrecision);
 
       if (side === 'bid') {
         const amount: number = currentPrice ? percentOfBalanceRound / currentPrice : 0;
-        const amountRound: number = Math.floor(amount * numberRound) / numberRound;
+        const amountRound: number = Math.floor(amount * Math.pow(10, bAmount)) / Math.pow(10, bAmount);
         form.setFieldsValue({
           [`${side}.total`]: percentOfBalanceRound,
           [`${side}.amount`]: amountRound,
         });
       } else if (side === 'ask') {
         const total: number = currentPrice ? percentOfBalanceRound * currentPrice : 0;
-        const totalRound: number = Math.floor(total * numberRound) / numberRound;
+        const totalRound: number = Math.floor(total * Math.pow(10, groupPrecision)) / Math.pow(10, groupPrecision);
         form.setFieldsValue({
           [`${side}.total`]: totalRound,
           [`${side}.amount`]: percentOfBalanceRound,
@@ -186,8 +231,34 @@ export function OrderForm({balance, layout = 'default', canDeposit = true, isLoa
     validateForm();
   }
 
-  const onReplaceComma = (e: any) => {
+  const onReplaceComma = (e: any, totalDigit?: number) => {
+    // Remove comma operator
     e.target.value = e.target.value.replace(/[^0-9.]/g, '').replace(/(\..*?)\..*/g, '$1');
+
+    // Handle to prevent input wrong number format
+    let afterDot = 0;
+    if (e.target.value.includes(".")) {
+      const split: string[] = e.target.value.split(".");
+      afterDot = split[1].length;
+      if (totalDigit && afterDot >= totalDigit) {
+        e.target.value = `${Number(split[0]) || '0'}.${split[1].slice(0, totalDigit)}`
+      } else if (!split[0]) {
+        e.target.value = `0.${split[1].slice(0, totalDigit)}`
+      }
+    } else {
+      // Handle to remove leading zeros
+      e.target.value = Number(e.target.value)
+    }
+  }
+
+  const getAmountErrorMsg = () => {
+    if (side === "bid") {
+      const currentPrice = form.getFieldValue(`${side}.price`);
+      return t("common.maxAmount") + getPriceFormatted(balance / currentPrice, groupPrecision);
+    } else if (side === "ask") {
+      return t("common.maxAmount") + getPriceFormatted(balance, bAmount);
+    }
+    return null;
   }
 
   return (
@@ -200,7 +271,7 @@ export function OrderForm({balance, layout = 'default', canDeposit = true, isLoa
       >
         <div className="balance">
           <div className="value">
-            {`Balance: ${getPriceFormatted(balance || 0, 2)} ${side === 'bid' ? quoteCurrency : baseCurrency}`}
+            {`Balance: ${getPriceFormatted(balance || 0, bAmount)} ${side === 'bid' ? quoteCurrency : baseCurrency}`}
           </div>
           {
             canDeposit &&
@@ -216,7 +287,7 @@ export function OrderForm({balance, layout = 'default', canDeposit = true, isLoa
             &&
             <Form.Item
               name={`${side}.stop`}>
-              <Input onInput={onReplaceComma} type="text" onWheel={preventScroll} placeholder="Trigger Price"
+              <Input onInput={(e: any) => { onReplaceComma(e, groupPrecision) }} type="text" onWheel={preventScroll} placeholder="Trigger Price"
                 prefix={<Typography className="prefix">Trigger Price</Typography>}
                 suffix={quoteCurrency} />
             </Form.Item>
@@ -234,35 +305,41 @@ export function OrderForm({balance, layout = 'default', canDeposit = true, isLoa
               :
               <Form.Item
                 name={`${side}.price`}>
-                <Input onInput={onReplaceComma} type="text" onWheel={preventScroll} placeholder={"Price"}
+                <Input onInput={(e: any) => { onReplaceComma(e, groupPrecision) }} type="text" onWheel={preventScroll} placeholder={"Price"}
                   prefix={<Typography className="prefix">Price</Typography>}
                   suffix={quoteCurrency} />
               </Form.Item>
           }
 
-          <Form.Item
-            name={`${side}.amount`}>
-            <Input
-              onInput={onReplaceComma}
-              type="text"
-              onWheel={preventScroll}
-              placeholder="Amount"
-              prefix={<Typography className="prefix">Amount</Typography>}
-              suffix={baseCurrency} />
-          </Form.Item>
+          <Popover visible={showAmountPopover} placement="top" content={getAmountErrorMsg()} trigger="focus">
+            <Form.Item
+              name={`${side}.amount`}>
+              <Input
+                className={clsx(showAmountPopover && 'error')}
+                onFocus={() => { onFocusAmountField() }}
+                onBlur={() => { setShowAmountPopover(false) }}
+                onInput={(e: any) => { onReplaceComma(e, bAmount) }}
+                type="text"
+                onWheel={preventScroll}
+                placeholder="Amount"
+                prefix={<Typography className="prefix">Amount</Typography>}
+                suffix={baseCurrency} />
+            </Form.Item>
+          </Popover>
 
           <div className={clsx("slider-group", side, layout)}>
             <Slider onChange={onSliderChange} marks={marks} step={5} value={sliderValue} />
           </div>
 
-          <Form.Item
-            name={`${side}.total`}>
-            <Input onInput={onReplaceComma} type="text" onWheel={preventScroll} placeholder="Total"
-              prefix={<Typography className="prefix">Total</Typography>}
-              suffix={quoteCurrency} />
-          </Form.Item>
+          <Popover placement="top" content={fiatCurrency && `≈ ${fiatCurrency?.symbol}${form.getFieldValue(`${side}.total`) * fiatCurrency?.usd_rate}`} trigger="focus">
+            <Form.Item
+              name={`${side}.total`}>
+              <Input onInput={(e: any) => { onReplaceComma(e, groupPrecision) }} type="text" onWheel={preventScroll} placeholder="Total"
+                prefix={<Typography className="prefix">Total</Typography>}
+                suffix={quoteCurrency} />
+            </Form.Item>
+          </Popover>
           <Button
-            onClick={() => { !isLoggedIn && router.push('/login') }}
             disabled={isDisabled || isLoading}
             htmlType={isLoggedIn ? "submit" : "button"}
             className={clsx(side === 'bid' && "success", side === 'ask' && "danger")} type='primary'>{getButtonSubmitLabel()}</Button>
