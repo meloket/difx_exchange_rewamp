@@ -6,7 +6,7 @@ import { Chart as LineChart, dispose, init } from 'klinecharts';
 import { useEffect, useRef, useState } from 'react';
 import { AxiosResponse } from "axios";
 import { API_ENDPOINT, QUERY_KEY, REFETCH } from '../../../shared/constants';
-import { useTheme, useHttpGetByEvent, useAPI, useSocket, useSocketProps, SocketEvent, ChartData } from './../../../shared';
+import { useTheme, useAPI, useChartSocket, ChartSocketInterface, ChartData } from './../../../shared';
 import { layoutTypeAtom } from "../../../shared/atom"
 import { rect, circle } from './shapeDefinition';
 import { ChartStyled, GridStyled, IndicatorStyled, MainStyled } from './styled';
@@ -50,7 +50,7 @@ function Chart({
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<HTMLDivElement>(null);
   const previousPairRef = useRef()
-  const [subsIndex, setSubsIndex] = useState<any>();
+  const [subsIndex, setSubsIndex] = useState<any>([]);
   const [lineChart, setLineChart] = useState<LineChart>();
   const [chartHistory, setChartHistory] = useState<Array<ChartDataType>>([]);
   const [currentChartData, setCurrentChartData] = useState<ChartData>();
@@ -131,12 +131,19 @@ function Chart({
             }
           }
       })
+      const paneId = kLineChart?.createTechnicalIndicator("VOL", false);
+      kLineChart?.createTechnicalIndicator("VOL", false, { id: paneId as string })
+      subsIndex["VOL"] = paneId
       setLineChart(kLineChart);
     }
     return () => {
       dispose('k-line-chart')
     }
   }, []);
+
+  useEffect(()=>{
+    console.log(subsIndex)
+  },[subsIndex])
   
   useEffect(() => {
     if(lineChart){
@@ -146,26 +153,17 @@ function Chart({
     }
   },[lineChart, pair, currentResolution])
 
-  const param: useSocketProps = {
-    join: pair,
-    leave: previousPairRef.current,
-    event: SocketEvent.graph_data,
+  const param: ChartSocketInterface = {
+    pair: pair,
+    resolution: currentResolution
   };
 
-  const data = useSocket(param);
+  const data = useChartSocket(param);
 
   useEffect(()=>{
     if(data){
-      const dataStructure: ChartData = {
-        timestamp: (data[0] * 1000),
-        open: data[1],
-        close: data[2],
-        high: data[3],
-        low: data[4],
-        volume: data[5],
-      }
       if(lineChart){
-        lineChart.updateData(dataStructure)
+        lineChart.updateData(data)
       }
     }
   },[data])
@@ -193,15 +191,15 @@ function Chart({
     }
   }, [currentChartType, lineChart]);
 
-  useEffect(() => {
-    if (lineChart && currentChartType) {
-      if(mainIndicator === ''){
-        lineChart?.removeTechnicalIndicator("candle_pane")
-      }else{
-        lineChart?.createTechnicalIndicator(mainIndicator, false, { id: 'candle_pane' });
-      }
-    }
-  }, [mainIndicator, lineChart]);
+  // useEffect(() => {
+  //   if (lineChart && currentChartType) {
+  //     if(mainIndicator === ''){
+  //       lineChart?.removeTechnicalIndicator("candle_pane")
+  //     }else{
+  //       lineChart?.createTechnicalIndicator(mainIndicator, false, { id: 'candle_pane' });
+  //     }
+  //   }
+  // }, [mainIndicator, lineChart]);
 
   useEffect(() => {
     if (lineChart) {
@@ -227,6 +225,7 @@ function Chart({
     if(subIndicatorSelected){
       if(subsIndex){
         if(subsIndex[`${subIndicatorSelected}`]){
+          console.log("SUB")
           lineChart?.removeTechnicalIndicator(subsIndex[`${subIndicatorSelected}`], subIndicatorSelected)
           delete subsIndex[`${subIndicatorSelected}`]
           setSubsIndex(subsIndex)

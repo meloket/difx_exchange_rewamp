@@ -74,7 +74,8 @@ export const STORE_KEY = {
   FAVORITE_SPOT_PAIRS: 'favoriteSpotPairs',
   FAVORITE_FUTURE_PAIRS: 'favoriteFuturePairs',
   LAST_PAIR: 'lastPair',
-  EXCHANGE_STYLE: 'exchangeStyle'
+  EXCHANGE_STYLE: 'exchangeStyle',
+  RECENT_TRANSACTIONS: 'recentTransactions'
 }
 
 export const API_ENDPOINT = {
@@ -110,6 +111,7 @@ export const API_ENDPOINT = {
   VERIFY_IP: '/api/v1/auth/verify-ip',
   VERIFY_OTP: '/api/v1/auth/verify-profile-code',
   RESEND_IP_VERIFICATION_MAIL: `api/v1/auth/resend-ip-verification`,
+  LOG_OUT: `/api/v1/auth/logout`,
   REFRESH_TOKEN: '/api/v1/auth/refresh',
   GET_ORDER_OPEN: (symbol?: string) => `/api/v1/user/open-orders${symbol ? `?symbol=${symbol}` : ''}`,
   GET_ORDER_STOP_LIMIT: (symbol?: string) => `/api/v1/user/sl-orders${symbol ? `?symbol=${symbol}` : ''}`,
@@ -117,7 +119,7 @@ export const API_ENDPOINT = {
   PLACE_ORDER_MARKET: '/api/v1/order/market-order',
   PLACE_ORDER_STOP: '/api/v1/order/sl-order',
   CANCEL_ORDER: '/api/v1/order/cancel-order',
-  CANCEL_STOP_LIMIT_ORDER: '/api/v1/order/cancel-stop',
+  CANCEL_STOP_LIMIT_ORDER: '/api/v1/order/cancel-slorder',
   GET_MARKET_PAIRS: '/api/v1/market/pairs',
   GET_SELECTED_MARKET_PAIRS: (coin: string) => `/api/v1/market/pairs?symbol=${coin}`,
   GET_COIN_DETAILS: (coin: string) => `/api/v1/market/coin-detail?coin=${coin}`,
@@ -131,5 +133,7 @@ export const API_ENDPOINT = {
   GET_WALLET_OVERVIEW: '/api/v1/wallet/overview',
   GET_SPOT_OVERVIEW: '/api/v1/wallet/spot-overview',
   GET_TRANSACTION_LIST: (page: number, limit: number) => `/api/v1/wallet/transaction?page=${page}&limit=${limit}`,
-  GENERATE_DEPOSIT_ADDRESS: `/api/v1/wallet/deposit-address`
+  GENERATE_DEPOSIT_ADDRESS: `/api/v1/wallet/deposit-address`,
+  WITHDRAW_REQUEST: `/api/v1/wallet/withdraw`,
+  GET_RECENT_TRANSACTIONS: `api/v1/wallet/recent-transaction`,
 }
