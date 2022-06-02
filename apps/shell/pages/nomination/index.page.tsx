@@ -2,10 +2,13 @@ import React, { useState } from "react";
 import { Tabs, Modal } from "antd";
 import AppLayout from "../index.page";
 import { PageStyled } from "./styled";
+import RemoveModal from "../../components/nomination/removeModal";
+import AddModal from "../../components/nomination/addModal";
 
 export default function NominationPate() {
     const [tab, setTab] = useState("nominess");
     const [removeModal, setRemoveModal] = useState(false);
+    const [addModal, setAddModal] = useState(false);
     const { TabPane } = Tabs;
 
     return (
@@ -23,7 +26,7 @@ export default function NominationPate() {
                         </div>
                     </div>
                     <div className="btnContainer">
-                        <div className="addButton">
+                        <div className="addButton" onClick={() => setAddModal(true)}>
                             Add Nominess
                         </div>
                     </div>
@@ -140,7 +143,10 @@ export default function NominationPate() {
                     </div>
                 </div>
                 <Modal className="removeModal" visible={removeModal} footer={null} onCancel={() => setRemoveModal(false)}>
-                    This is remvoe modal.
+                    <RemoveModal onCancel={() => setRemoveModal(false)}/>
+                </Modal>
+                <Modal className="addModal" visible={addModal} footer={null} onCancel={() => setAddModal(false)}>
+                    <AddModal onCancel={() => setAddModal(false)}/>
                 </Modal>
             </PageStyled>
         </AppLayout>

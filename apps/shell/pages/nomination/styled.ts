@@ -310,7 +310,6 @@ export const PageStyled = styled.div`
     
                         .pending {
                             color: #FAAD14;
-                            cursor: pointer;
                             font-weight: 700;
                             font-size: 18px;
                             line-height: 18px;
@@ -368,12 +367,6 @@ export const PageStyled = styled.div`
                     color: #2B2C3E;
                 }
             }
-        }
-    }
-
-    .removeModal {
-        .ant-modal-close {
-            display: none !important;
         }
     }
 `
