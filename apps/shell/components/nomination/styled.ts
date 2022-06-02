@@ -108,5 +108,26 @@ export const PageStyledAddModal = styled.div`
                 }
             }
         }
+
+        .btnContainer {
+            padding-top: 100px;
+            display: flex;
+            justify-content: flex-end;
+
+            .addBtn {
+                width: 127px;
+                height: 42px;
+                background: #3D7EFF;
+                border-radius: 2px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                color: white;
+                font-weight: 700;
+                font-size: 14px;
+                line-height: 22px;
+                cursor: pointer;
+            }
+        }
     }
 `

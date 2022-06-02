@@ -28,6 +28,21 @@ export default function AddModal ({onCancel}) {
                             <input placeholder = "Select the relationship"/>
                         </div>
                     </div>
+                    <div className="inputItem">
+                        <div> Email </div>
+                        <div className="inpuBox">
+                            <input placeholder = "Enter your email"/>
+                        </div>
+                    </div>
+                    <div className="inputItem">
+                        <div> Nominees Percentage </div>
+                        <div className="inpuBox">
+                            <input placeholder = "Enter allocate percentage"/>
+                        </div>
+                    </div>
+                </div>
+                <div className="btnContainer">
+                    <div className="addBtn">Add</div>
                 </div>
             </div>
         </PageStyledAddModal>
