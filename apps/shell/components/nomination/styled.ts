@@ -84,6 +84,7 @@ export const PageStyledAddModal = styled.div`
                 color: black;
 
                 .inpuBox {
+                    position: relative;
                     width: 307px;
                     height: 46px;
                     background-color: #F8F8F9;
@@ -91,6 +92,28 @@ export const PageStyledAddModal = styled.div`
                     padding: 0px 20px;
                     display: flex;
                     align-items: center;
+                    font-weight: 400;
+                    font-size: 14px;
+                    line-height: 22px;
+
+                    .selectBox {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        width: 100%;
+
+                        .ant-select-selector {
+                            align-items: center;
+                            padding: 0px;
+
+                            .ant-select-selection-placeholder {
+                                font-weight: 400;
+                                font-size: 14px;
+                                line-height: 22px;
+                                color: #9AA5B4;
+                            }
+                        }
+                    }
 
                     input {
                         width: 100%;

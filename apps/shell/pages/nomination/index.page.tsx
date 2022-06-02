@@ -9,7 +9,17 @@ export default function NominationPate() {
     const [tab, setTab] = useState("nominess");
     const [removeModal, setRemoveModal] = useState(false);
     const [addModal, setAddModal] = useState(false);
+    const [firstName, setFirstName] = useState("");
+    const [lastName, setLastName] = useState("");
+    const [relationship, setRelationship] = useState("");
+    const [email, setEmail] = useState("");
+    const [percentage, setPercentage] = useState(0);
+
     const { TabPane } = Tabs;
+
+    const addNominee = () => {
+        console.log(firstName, lastName, relationship, email, percentage);
+    }
 
     return (
         <AppLayout>
@@ -146,7 +156,19 @@ export default function NominationPate() {
                     <RemoveModal onCancel={() => setRemoveModal(false)}/>
                 </Modal>
                 <Modal className="addModal" visible={addModal} footer={null} onCancel={() => setAddModal(false)}>
-                    <AddModal onCancel={() => setAddModal(false)}/>
+                    <AddModal onCancel={() => setAddModal(false)}
+                        firstName={firstName}
+                        lastName={lastName}
+                        relationship={relationship}
+                        email={email}
+                        percentage={percentage}
+                        setFirstName={setFirstName}
+                        setLastName={setLastName}
+                        setRelationship={setRelationship}
+                        setEmail={setEmail}
+                        setPercentage={setPercentage}
+                        addNominee={addNominee}
+                    />
                 </Modal>
             </PageStyled>
         </AppLayout>
