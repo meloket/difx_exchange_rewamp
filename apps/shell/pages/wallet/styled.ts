@@ -44,6 +44,19 @@ const WalletContentStyled = styled(Layout.Content)`
             }
         }
     }
+    .ant-picker{
+        height: 48px !important;
+    }
+
+    .ant-pagination{
+        padding: 20px 10px;
+        display: flex;
+        justify-content: flex-end;
+    }
+/* 
+    .ant-select-selector{
+        height: 32px !important;
+    } */
 `;
 const WalletTabsWrapper = styled.div`
     background: ${({theme}) => theme.background.secondary};
@@ -64,6 +77,9 @@ const WalletTabsWrapper = styled.div`
 const WalletWrapper = styled.div`
     padding: 25px;
     background: ${({theme}) => theme.background.secondary};
+   .ant-select.ant-select-sm .ant-select-selector{
+        background: ${({theme}) => theme.background.primary} !important;
+   }
 `
 const DepositLayout = styled.div`
     margin-top: 2px;
